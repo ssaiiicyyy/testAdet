@@ -29,14 +29,17 @@ export class ManufacturersController {
   // Update manufacturer (protected)
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
-    return this.manufacturerService.updateManufacturers(+id, body);
+  async update(
+    @Param('id') id: string,
+    @Body() body: { manufacturers_name?: string },
+  ) {
+    return this.manufacturerService.update(+id, body);
   }
 
   // Delete manufacturer (protected)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.manufacturerService.updateManufacturers(+id, Body);
+    return this.manufacturerService.deleteManufacturer(+id);
   }
 }

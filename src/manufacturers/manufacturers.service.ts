@@ -2,13 +2,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import { UpdateManufacturerDto } from './dto/update-manufacturer.dto';
 
 @Injectable()
 export class ManufacturersService {
-  deleteManufacturer(arg0: number) {
-    throw new Error('Method not implemented.');
-  }
   constructor(private db: DatabaseService) {}
 
   private pool = () => this.db.getPool();
@@ -36,8 +32,8 @@ export class ManufacturersService {
     return rows ?? [];
   }
 
-  async update(id: string, data: UpdateManufacturerDto) {
-    const manufacturerId = Number(id);
+  async update(id: number, data: { manufacturers_name?: string }) {
+    const manufacturerId = id;
     if (!data.manufacturers_name) return await this.findById(manufacturerId);
     await this.pool()!.execute(
       'UPDATE manufacturers SET manufacturers_name = ? WHERE manufacturers_id = ?',
@@ -46,7 +42,7 @@ export class ManufacturersService {
     return this.findById(manufacturerId);
   }
 
-  async deleteCategory(id: number) {
+  async deleteManufacturer(id: number) {
     try {
       const [res] = await this.pool()!.execute<ResultSetHeader>(
         'DELETE FROM manufacturers WHERE manufacturers_id = ?',
@@ -56,8 +52,10 @@ export class ManufacturersService {
     } catch (error) {
       if (
         error instanceof Error &&
-        'code' in error &&
-        error.code === 'ER_ROW_IS_REFERENCED_2'
+        (('code' in error &&
+          (error.code === 'ER_ROW_IS_REFERENCED_2' ||
+            error.code === 'ER_ROW_IS_REFERENCED')) ||
+          ('errno' in error && error.errno === 1451))
       ) {
         throw new ConflictException(
           'Cannot delete this manufacturer because products are linked to it.',
