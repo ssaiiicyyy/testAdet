@@ -36,7 +36,7 @@ export class CustomerService {
     return rows;
   }
 
-  async updateCategory(
+  async updateCustomer(
     id: number,
     partial: {
       customer_name?: string;
@@ -69,7 +69,7 @@ export class CustomerService {
     return this.findById(id);
   }
 
-  async deleteCategory(id: number) {
+  async deleteCustomer(id: number) {
     const [result] = await this.pool()!.execute<ResultSetHeader>(
       'DELETE FROM customer WHERE customer_id = ?',
       [id],

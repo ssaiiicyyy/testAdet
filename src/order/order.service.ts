@@ -1,93 +1,127 @@
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { DatabaseService } from '../database/database.service';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import * as bcrypt from 'bcryptjs';
+
+export interface CreateOrderData {
+  product_id: number;
+  quantity: number;
+  order_status: string;
+  total_amount: number;
+  customer_id: number;
+}
+
+export interface UpdateOrderData {
+  product_id?: number;
+  quantity?: number;
+  order_date?: string;
+  order_status?: string;
+  total_amount?: number;
+  customer_id?: number;
+}
 
 @Injectable()
 export class OrderService {
-  deleteOrder(arg0: number) {
-    throw new Error('Method not implemented.');
-  }
-  updateOrder(arg0: number, body: any) {
-    throw new Error('Method not implemented.');
-  }
-  create(name: string) {
-      throw new Error('Method not implemented.');
-  }
   constructor(private db: DatabaseService) {}
 
   private pool = () => this.db.getPool();
 
-  async createCategory(username: string, password: string, role = 'user') {
-    const hashed = await bcrypt.hash(password, 10);
-    const [result] = await this.pool()!.execute<ResultSetHeader>(
-      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-      [username, hashed, role],
-    );
-    return { id: result?.insertId ?? 0, username, role };
-  }
+  async create(data: CreateOrderData) {
+    await this.ensureProductExists(data.product_id);
+    await this.ensureCustomerExists(data.customer_id);
 
-  async findByUsername(username: string) {
-    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, password, role, refresh_token FROM users WHERE username = ?',
-      [username],
+    const [result] = await this.pool()!.execute<ResultSetHeader>(
+      'INSERT INTO `orders` (product_id, quantity, order_date, order_status, total_amount, customer_id) VALUES (?, ?, CURDATE(), ?, ?, ?)',
+      [
+        data.product_id,
+        data.quantity,
+        data.order_status,
+        data.total_amount,
+        data.customer_id,
+      ],
     );
-    return rows?.[0];
+    return this.findById(result.insertId);
   }
 
   async findById(id: number) {
     const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role, created_at FROM users WHERE id = ?',
+      'SELECT * FROM `orders` WHERE order_id = ?',
       [id],
     );
-    return rows?.[0];
+    return rows[0];
   }
 
   async getAll() {
     const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role, created_at FROM users',
+      'SELECT * FROM `orders`',
     );
-    return rows ?? [];
+    return rows;
   }
 
-  async updateCategory(id: number, partial: { username?: string; password?: string; role?: string }) {
+  async updateOrder(id: number, partial: UpdateOrderData) {
     const fields: string[] = [];
-    const values: any[] = [];
-    if (partial.username) {
-      fields.push('username = ?');
-      values.push(partial.username);
+    const values: (string | number)[] = [];
+
+    if (partial.product_id !== undefined) {
+      await this.ensureProductExists(partial.product_id);
+      fields.push('product_id = ?');
+      values.push(partial.product_id);
     }
-    if (partial.password) {
-      const hashed = await bcrypt.hash(partial.password, 10);
-      fields.push('password = ?');
-      values.push(hashed);
+    if (partial.quantity !== undefined) {
+      fields.push('quantity = ?');
+      values.push(partial.quantity);
     }
-    if (partial.role) {
-      fields.push('role = ?');
-      values.push(partial.role);
+    if (partial.order_date !== undefined) {
+      fields.push('order_date = ?');
+      values.push(partial.order_date);
     }
-    if (fields.length === 0) return await this.findById(id);
+    if (partial.order_status !== undefined) {
+      fields.push('order_status = ?');
+      values.push(partial.order_status);
+    }
+    if (partial.total_amount !== undefined) {
+      fields.push('total_amount = ?');
+      values.push(partial.total_amount);
+    }
+    if (partial.customer_id !== undefined) {
+      await this.ensureCustomerExists(partial.customer_id);
+      fields.push('customer_id = ?');
+      values.push(partial.customer_id);
+    }
+
+    if (fields.length === 0) return this.findById(id);
     values.push(id);
-    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-    await this.pool()!.execute(sql, values);
+    await this.pool()!.execute(
+      `UPDATE \`orders\` SET ${fields.join(', ')} WHERE order_id = ?`,
+      values,
+    );
     return this.findById(id);
   }
 
-  async deleteCategory(id: number) {
-    const [res] = await this.pool()!.execute<ResultSetHeader>('DELETE FROM users WHERE id = ?', [id]);
-    return (res?.affectedRows ?? 0) > 0;
-  }
-
-  async setRefreshToken(id: number, refreshToken: string | null) {
-    await this.pool()!.execute('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, id]);
-  }
-
-  async findByRefreshToken(refreshToken: string) {
-    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role FROM users WHERE refresh_token = ?',
-      [refreshToken],
+  async deleteOrder(id: number) {
+    const [result] = await this.pool()!.execute<ResultSetHeader>(
+      'DELETE FROM `orders` WHERE order_id = ?',
+      [id],
     );
-    return rows?.[0];
+    return result.affectedRows > 0;
+  }
+
+  private async ensureProductExists(productId: number) {
+    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
+      'SELECT product_id FROM product WHERE product_id = ?',
+      [productId],
+    );
+    if (rows.length === 0) {
+      throw new NotFoundException(`Product ${productId} not found`);
+    }
+  }
+
+  private async ensureCustomerExists(customerId: number) {
+    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
+      'SELECT customer_id FROM customer WHERE customer_id = ?',
+      [customerId],
+    );
+    if (rows.length === 0) {
+      throw new NotFoundException(`Customer ${customerId} not found`);
+    }
   }
 }

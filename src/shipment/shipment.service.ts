@@ -1,93 +1,103 @@
-
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ResultSetHeader, RowDataPacket } from 'mysql2';
 import { DatabaseService } from '../database/database.service';
-import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import * as bcrypt from 'bcryptjs';
+
+export interface CreateShipmentData {
+  order_id: number;
+  courier_name: string;
+  tracking_number?: string | null;
+  shipment_status: string;
+}
+
+export interface UpdateShipmentData {
+  order_id?: number;
+  courier_name?: string;
+  tracking_number?: string | null;
+  shipment_status?: string;
+}
 
 @Injectable()
 export class ShipmentsService {
-  deleteShipment(arg0: number) {
-      throw new Error('Method not implemented.');
-  }
-  updateShipment(arg0: number, body: any) {
-      throw new Error('Method not implemented.');
-  }
-  create(name: string) {
-      throw new Error('Method not implemented.');
-  }
   constructor(private db: DatabaseService) {}
 
   private pool = () => this.db.getPool();
 
-  async createPayment(username: string, password: string, role = 'user') {
-    const hashed = await bcrypt.hash(password, 10);
-    const [result] = await this.pool()!.execute<ResultSetHeader>(
-      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
-      [username, hashed, role],
-    );
-    return { id: result?.insertId ?? 0, username, role };
-  }
+  async create(data: CreateShipmentData) {
+    await this.ensureOrderExists(data.order_id);
 
-  async findByUsername(username: string) {
-    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, password, role, refresh_token FROM users WHERE username = ?',
-      [username],
+    const [result] = await this.pool()!.execute<ResultSetHeader>(
+      'INSERT INTO shipment (order_id, courier_name, tracking_number, shipment_status) VALUES (?, ?, ?, ?)',
+      [
+        data.order_id,
+        data.courier_name,
+        data.tracking_number ?? null,
+        data.shipment_status,
+      ],
     );
-    return rows?.[0];
+    return this.findById(result.insertId);
   }
 
   async findById(id: number) {
     const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role, created_at FROM users WHERE id = ?',
+      'SELECT * FROM shipment WHERE shipment_id = ?',
       [id],
     );
-    return rows?.[0];
+    return rows[0];
   }
 
   async getAll() {
     const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role, created_at FROM users',
+      'SELECT * FROM shipment',
     );
-    return rows ?? [];
+    return rows;
   }
 
-  async updateCategory(id: number, partial: { username?: string; password?: string; role?: string }) {
+  async updateShipment(id: number, partial: UpdateShipmentData) {
     const fields: string[] = [];
-    const values: any[] = [];
-    if (partial.username) {
-      fields.push('username = ?');
-      values.push(partial.username);
+    const values: (string | number | null)[] = [];
+
+    if (partial.order_id !== undefined) {
+      await this.ensureOrderExists(partial.order_id);
+      fields.push('order_id = ?');
+      values.push(partial.order_id);
     }
-    if (partial.password) {
-      const hashed = await bcrypt.hash(partial.password, 10);
-      fields.push('password = ?');
-      values.push(hashed);
+    if (partial.courier_name !== undefined) {
+      fields.push('courier_name = ?');
+      values.push(partial.courier_name);
     }
-    if (partial.role) {
-      fields.push('role = ?');
-      values.push(partial.role);
+    if (partial.tracking_number !== undefined) {
+      fields.push('tracking_number = ?');
+      values.push(partial.tracking_number);
     }
-    if (fields.length === 0) return await this.findById(id);
+    if (partial.shipment_status !== undefined) {
+      fields.push('shipment_status = ?');
+      values.push(partial.shipment_status);
+    }
+
+    if (fields.length === 0) return this.findById(id);
     values.push(id);
-    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-    await this.pool()!.execute(sql, values);
+    await this.pool()!.execute(
+      `UPDATE shipment SET ${fields.join(', ')} WHERE shipment_id = ?`,
+      values,
+    );
     return this.findById(id);
   }
 
-  async deleteCategory(id: number) {
-    const [res] = await this.pool()!.execute<ResultSetHeader>('DELETE FROM users WHERE id = ?', [id]);
-    return (res?.affectedRows ?? 0) > 0;
-  }
-
-  async setRefreshToken(id: number, refreshToken: string | null) {
-    await this.pool()!.execute('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, id]);
-  }
-
-  async findByRefreshToken(refreshToken: string) {
-    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
-      'SELECT id, username, role FROM users WHERE refresh_token = ?',
-      [refreshToken],
+  async deleteShipment(id: number) {
+    const [result] = await this.pool()!.execute<ResultSetHeader>(
+      'DELETE FROM shipment WHERE shipment_id = ?',
+      [id],
     );
-    return rows?.[0];
+    return result.affectedRows > 0;
+  }
+
+  private async ensureOrderExists(orderId: number) {
+    const [rows] = await this.pool()!.execute<RowDataPacket[]>(
+      'SELECT order_id FROM `orders` WHERE order_id = ?',
+      [orderId],
+    );
+    if (rows.length === 0) {
+      throw new NotFoundException(`Order ${orderId} not found`);
+    }
   }
 }

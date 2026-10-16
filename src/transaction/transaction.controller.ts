@@ -1,42 +1,92 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
-import { TransactionsService } from './transaction.service';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  TransactionsService,
+  type CreateTransactionData,
+  type UpdateTransactionData,
+} from './transaction.service';
 
-@Controller('transactions')
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0;
+}
+
+function isCreateTransactionData(
+  body: unknown,
+): body is CreateTransactionData {
+  return (
+    isRecord(body) &&
+    typeof body.transaction_code === 'string' &&
+    body.transaction_code.trim().length > 0 &&
+    isPositiveInteger(body.order_id) &&
+    isPositiveInteger(body.payment_id)
+  );
+}
+
+function isUpdateTransactionData(
+  body: unknown,
+): body is UpdateTransactionData {
+  return (
+    isRecord(body) &&
+    (body.transaction_code === undefined ||
+      (typeof body.transaction_code === 'string' &&
+        body.transaction_code.trim().length > 0)) &&
+    (body.order_id === undefined || isPositiveInteger(body.order_id)) &&
+    (body.payment_id === undefined || isPositiveInteger(body.payment_id))
+  );
+}
+
+@Controller(['transaction', 'transactions'])
 export class TransactionsController {
   constructor(private transactionsService: TransactionsService) {}
 
-  // Get all transactions (protected)
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getAll() {
+  getAll() {
     return this.transactionsService.getAll();
   }
 
-  // Get single transaction by id (protected)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async getOne(@Param('id') id: string) {
+  getOne(@Param('id') id: string) {
     return this.transactionsService.findById(+id);
   }
 
-  // Create transaction (open - for demo)
   @Post()
-  async create(@Body() body: { username: string; password: string }) {
-    return this.transactionsService.createTransaction(body.username, body.password);
+  create(@Body() body: unknown) {
+    if (!isCreateTransactionData(body)) {
+      throw new BadRequestException(
+        'transaction_code, positive order_id, and positive payment_id are required',
+      );
+    }
+    return this.transactionsService.create(body);
   }
 
-  // Update transaction (protected)
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
+  update(@Param('id') id: string, @Body() body: unknown) {
+    if (!isUpdateTransactionData(body)) {
+      throw new BadRequestException('Invalid transaction update fields');
+    }
     return this.transactionsService.update(+id, body);
   }
 
-  // Delete transaction (protected)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  remove(@Param('id') id: string) {
     return this.transactionsService.remove(+id);
   }
 }

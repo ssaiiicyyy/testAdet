@@ -59,13 +59,13 @@ export class CustomerController {
       address?: string;
     },
   ) {
-    return this.customerService.updateCategory(+id, body);
+    return this.customerService.updateCustomer(+id, body);
   }
 
   // Delete customer (protected)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return this.customerService.deleteCategory(+id);
+    return this.customerService.deleteCustomer(+id);
   }
 }
