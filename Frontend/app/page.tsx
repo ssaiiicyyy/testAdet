@@ -32,6 +32,7 @@ export default function HomePage() {
           align="left"
           draggable
           sweep
+          style={{}}
         />
       </div>
       <div className="hero-name px-4 py-8 text-center text-[clamp(4rem,24vw,300px)] font-bold leading-none">
