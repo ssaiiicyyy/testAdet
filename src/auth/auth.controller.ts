@@ -1,4 +1,11 @@
-import { BadRequestException, Controller, Post, Body } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  ConflictException,
+  Controller,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/user.service';
 
@@ -7,8 +14,28 @@ export class AuthController {
   constructor(private authService: AuthService, private usersService: UsersService) {}
 
   @Post('register')
-  async register(@Body() body: { username: string; password: string }) {
-    return this.usersService.createUser(body.username, body.password);
+  async register(@Body() body: unknown) {
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      Array.isArray(body) ||
+      !('username' in body) ||
+      !('password' in body) ||
+      typeof body.username !== 'string' ||
+      body.username.trim().length === 0 ||
+      typeof body.password !== 'string' ||
+      body.password.length === 0
+    ) {
+      throw new BadRequestException('username and password are required');
+    }
+
+    const username = body.username.trim();
+    const existingUser = await this.usersService.findByUsername(username);
+    if (existingUser) {
+      throw new ConflictException('Username is already taken');
+    }
+
+    return this.usersService.createUser(username, body.password);
   }
 
   @Post('login')
@@ -27,7 +54,7 @@ export class AuthController {
     }
 
     const user = await this.authService.validateUser(body.username, body.password);
-    if (!user) return { error: 'Invalid credentials' };
+    if (!user) throw new UnauthorizedException('Invalid credentials');
     return this.authService.login(user);
   }
 
