@@ -105,56 +105,76 @@ export default function LoginPage() {
       </header>
 
       <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center p-4">
-        <Card className="h-auto min-h-[430px] w-full max-w-md border-0 bg-card shadow-[0_20px_45px_rgba(15,23,42,0.12)] ring-0">
-          <CardHeader className="pt-5 pr-8 pl-8">
-            <CardTitle className="text-3xl font-bold">Login</CardTitle>
-            <CardDescription className="pt-1.5 pb-2 text-left text-sm text-muted-foreground">
-              Enter your credentials to access your account.
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-4 px-8">
-              {error && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-500 dark:border-red-900 dark:bg-red-950/50">
-                  {error}
+        <Card className="grid h-auto min-h-[430px] w-full max-w-4xl grid-cols-1 gap-0 border-0 bg-card py-0 shadow-[0_20px_45px_rgba(15,23,42,0.12)] ring-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_55px_rgba(15,23,42,0.2)] motion-reduce:transition-none md:grid-cols-[0.9fr_1.1fr]">
+          <section className="flex flex-col justify-center bg-black p-8 pt-6 sm:p-10 sm:pt-8 md:border-r md:border-[#262626]">
+            <Image
+              src="/oshoppe-login-mark.png"
+              alt=""
+              width={88}
+              height={88}
+              className="mb-6 size-16 object-contain sm:size-[88px]"
+            />
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
+              <span className="block text-white">Welcome to</span>
+              <span className="block bg-gradient-to-r from-[#f97316] via-[#ea580c] to-[#9a3412] bg-clip-text text-transparent">
+                OSHOPPE
+              </span>
+            </h1>
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-[#d4d4d4]">
+              Discover great products and keep your shopping orders all in one place.
+            </p>
+          </section>
+          <section className="p-8 sm:p-10">
+            <CardHeader className="p-0 pb-6">
+              <CardTitle className="text-3xl font-bold">Login</CardTitle>
+              <CardDescription className="pt-1.5 text-left text-sm text-muted-foreground">
+                Enter your credentials to access your account.
+              </CardDescription>
+            </CardHeader>
+            <form onSubmit={handleLogin}>
+              <CardContent className="space-y-4 px-0">
+                {error && (
+                  <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-500 dark:border-red-900 dark:bg-red-950/50">
+                    {error}
+                  </div>
+                )}
+                <div className="space-y-2 text-left">
+                  <Label htmlFor="username" className="text-sm">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    className="border-foreground/30"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                  />
                 </div>
-              )}
-              <div className="space-y-2 text-left">
-                <Label htmlFor="username" className="text-sm">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  className="border-foreground/30"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  className="border-foreground/30"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4 px-8 pb-5">
-              <Button type="submit" className="h-11 w-full border-0 bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-[0_4px_10px_rgba(194,65,12,0.25)] transition-all hover:from-[#ea580c] hover:to-[#9a3412] hover:shadow-[0_5px_12px_rgba(194,65,12,0.3)]" disabled={loading}>
-                {loading ? "Logging in..." : "Login"}
-              </Button>
-              <div className="w-full border-t-1 border-foreground/20" />
-              <p className="text-center text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <a href={CONFIG.ROUTES.REGISTER} className="text-primary underline">
-                  Register
-                </a>
-              </p>
-            </CardFooter>
-          </form>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    className="border-foreground/30"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col gap-4 px-0 pt-6 pb-0">
+                <Button type="submit" className="h-11 w-full border-0 bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-[0_4px_10px_rgba(194,65,12,0.25)] transition-all hover:from-[#ea580c] hover:to-[#9a3412] hover:shadow-[0_5px_12px_rgba(194,65,12,0.3)]" disabled={loading}>
+                  {loading ? "Logging in..." : "Login"}
+                </Button>
+                <div className="w-full border-t-1 border-foreground/20" />
+                <p className="text-center text-sm text-muted-foreground">
+                  Don&apos;t have an account?{" "}
+                  <a href={CONFIG.ROUTES.REGISTER} className="text-primary underline">
+                    Register
+                  </a>
+                </p>
+              </CardFooter>
+            </form>
+          </section>
         </Card>
       </main>
 
