@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
 import { CONFIG } from "@/lib/config";
@@ -9,23 +9,32 @@ interface AuthGuardOptions {
   requireAuth?: boolean;
 }
 
+function subscribeToStorage(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
 export function useAuthGuard(
   { requireAuth = true }: AuthGuardOptions = {}
 ) {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
+  const userIsAuth = useSyncExternalStore(
+    subscribeToStorage,
+    isAuthenticated,
+    () => null
+  );
 
   useEffect(() => {
-    const userIsAuth = isAuthenticated();
+    if (userIsAuth === null) return;
 
     if (requireAuth && !userIsAuth) {
       router.replace(CONFIG.ROUTES.LOGIN);
     } else if (!requireAuth && userIsAuth) {
       router.replace(CONFIG.ROUTES.DASHBOARD);
-    } else {
-      setIsChecking(false);
     }
-  }, [requireAuth, router]);
+  }, [requireAuth, router, userIsAuth]);
 
-  return { isChecking };
+  return {
+    isChecking: userIsAuth === null || requireAuth !== userIsAuth,
+  };
 }
