@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
+import shopLogo from "../../Orange_and_Black_Bold_Grunge_Digital_Marketing_Presentation__1_-removebg-preview.png";
 import {
   Activity,
+  Building2,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -70,7 +73,8 @@ interface OrderRow {
 const navigation: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard },
   { label: "Orders", href: "#recent-orders", icon: ShoppingCart },
-  { label: "Products", href: "#products", icon: Package },
+  { label: "Products", href: "/products", icon: Package },
+  { label: "Manufacturers", href: "/manufacturers", icon: Building2 },
   { label: "Customers", href: "#customers", icon: UserRound },
 ];
 
@@ -335,19 +339,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#fff7ed] text-[#2b1d16] lg:flex">
-      <aside className="relative z-20 flex w-full shrink-0 flex-col border-[#f1e7df] bg-white px-4 py-4 text-[#513a2e] shadow-[0_2px_12px_rgba(79,45,20,0.06)] lg:fixed lg:inset-y-0 lg:left-0 lg:w-44 lg:border-r lg:px-3 lg:py-6 lg:shadow-[2px_0_14px_rgba(79,45,20,0.06)]">
+      <aside className="relative z-20 mx-3 mt-3 flex w-[calc(100%-1.5rem)] shrink-0 flex-col rounded-2xl bg-[#111111] px-4 py-4 text-white shadow-[0_4px_18px_rgba(0,0,0,0.22)] lg:fixed lg:bottom-3 lg:left-3 lg:top-3 lg:mx-0 lg:mt-0 lg:w-44 lg:px-3 lg:py-6">
         <a
           href="#dashboard"
           aria-label="OSHOPPE dashboard"
-          className="mb-4 flex items-center px-2 py-1 lg:mb-8"
+          className="mb-4 flex w-fit items-center px-2 py-1 lg:mb-8"
         >
           <Image
-            src="/oshoppe-logo.png"
+            src={shopLogo}
             alt="OSHOPPE Online Ordering System"
-            width={640}
-            height={640}
+            width={132}
+            height={52}
             priority
-            className="h-[52px] w-[132px] object-cover object-[center_42%]"
+            className="h-[52px] w-[132px] object-contain"
           />
         </a>
 
@@ -360,10 +364,10 @@ export default function DashboardPage() {
               key={label}
               href={href}
               aria-current={index === 0 ? "page" : undefined}
-              className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 index === 0
-                  ? "border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(255,240,232,0.76)_55%,rgba(255,220,198,0.62)_100%)] text-[#c83f08] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_12px_rgba(200,63,8,0.12)] backdrop-blur-md"
-                  : "text-[#61493d] hover:bg-[#fff7f2] hover:text-[#c83f08]"
+                  ? "border-y border-r border-y-[#f97316]/20 border-r-[#f97316]/20 border-l-[3px] border-l-[#f97316] bg-[linear-gradient(90deg,rgba(249,115,22,0.2)_0%,rgba(249,115,22,0.1)_100%)] text-[#ff781f] shadow-[inset_0_1px_0_rgba(255,140,50,0.12)] backdrop-blur-md"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
             >
               <Icon aria-hidden="true" size={18} />
@@ -375,14 +379,14 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-3 flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#61493d] transition-colors hover:bg-[#fff7f2] hover:text-[#c83f08] lg:mt-4"
+          className="mt-3 flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/10 hover:text-red-400 lg:mt-4"
         >
           <LogOut aria-hidden="true" size={18} />
           Log out
         </button>
       </aside>
 
-      <main id="dashboard" className="min-w-0 flex-1 lg:ml-44">
+      <main id="dashboard" className="min-w-0 flex-1 lg:ml-[calc(11rem+1.5rem)]">
         <header className="sticky top-0 z-10 flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[#f1e7df] bg-[#fff7ed] px-4 py-3 text-[#513a2e] sm:px-6 lg:px-8">
           <label className="flex h-10 w-full max-w-[296px] shrink-0 cursor-text items-center gap-2 rounded-full border border-[#e7d8cb] bg-white px-3 text-[#513a2e] shadow-sm focus-within:border-[#c83f08]">
             <input
@@ -498,6 +502,37 @@ export default function DashboardPage() {
     iconClass="bg-[#fed7aa] text-[#9a3412] shadow-[inset_3px_3px_6px_#fdba74,inset_-3px_-3px_6px_#ffffff]"
   />
 
+          </section>
+
+          <section
+            aria-labelledby="quick-actions-heading"
+            className="flex flex-col gap-4 rounded-2xl bg-[linear-gradient(110deg,#111111_0%,#17110f_72%,#67351f_100%)] px-5 py-6 text-white shadow-[0_8px_24px_rgba(27,16,10,0.2)] sm:flex-row sm:items-center sm:justify-between sm:px-6"
+          >
+            <div>
+              <h2
+                id="quick-actions-heading"
+                className="text-sm font-semibold sm:text-base"
+              >
+                Quick actions
+              </h2>
+              <p className="mt-1 text-xs text-white/75">
+                Record an order, add a product, or register a customer.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/orders"
+                className="rounded-lg bg-[#c83f08] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#a93408]"
+              >
+                New order
+              </Link>
+              <Link
+                href="/products"
+                className="rounded-lg border border-white/30 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                Manage products
+              </Link>
+            </div>
           </section>
 
           <section
@@ -666,9 +701,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <p className="text-center text-xs text-[#9b887d]">
-            Summary based on your orders, products, and customers.
-          </p>
+         
         </div>
       </main>
     </div>

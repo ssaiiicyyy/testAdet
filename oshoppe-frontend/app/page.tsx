@@ -62,7 +62,7 @@ export default function Home() {
                 <span>Welcome to OSHOPPE</span>
               </div>
 
-              <h1 className="font-heading text-[4.25rem] leading-[0.9] tracking-[0.015em] text-[#fff9e9] sm:text-[6rem] lg:text-[7.6rem]">
+              <h1 className="font-display text-[4.25rem] leading-[0.9] tracking-[0.015em] text-[#fff9e9] sm:text-[6rem] lg:text-[7.6rem]">
                 ONE CLICK
               </h1>
 
