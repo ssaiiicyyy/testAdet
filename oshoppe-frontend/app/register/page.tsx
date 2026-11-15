@@ -4,19 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import shopLogo from "../../Orange_and_Black_Bold_Grunge_Digital_Marketing_Presentation__1_-removebg-preview.png";
+import promoImage from "../../Orange and Black Bold Grunge Digital Marketing Presentation (2).png";
+import registerBag from "../../Orange_and_Black_Bold_Grunge_Digital_Marketing_Presentation-removebg-preview (1).png";
 import { apiClient } from "@/lib/api";
 import { CONFIG } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -45,102 +40,154 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="relative z-10 bg-background text-foreground shadow-[2px_2px_5px_#c5c5c5,-2px_-2px_5px_#ffffff]">
-        <nav
-          aria-label="Main navigation"
-          className="mx-auto flex min-h-20 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8"
+    <main className="relative flex min-h-screen items-center justify-center bg-[#fffbed] px-4 py-8 pt-20 sm:px-8 sm:pt-24">
+      <div className="absolute inset-x-4 top-5 z-10 mx-auto max-w-[900px] -translate-x-1 sm:inset-x-8 sm:top-7 sm:-translate-x-2">
+        <Link
+          href="/"
+          aria-label="OSHOPPE home"
+          className="relative block h-9 w-[108px] sm:h-11 sm:w-[132px]"
         >
-          <Link
-            href="/"
-            aria-label="OSHOPPE home"
-            className="relative block h-14 w-[126px] shrink-0 overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a3a3a3]"
-          >
-            <Image
-              src="/oshoppe-logo.png"
-              alt="OSHOPPE"
-              width={174}
-              height={174}
-              priority
-              className="absolute -left-6 -top-[46px] max-w-none"
-            />
-          </Link>
-          <div className="flex items-center gap-2 text-sm font-medium sm:gap-5">
-            <Link
-              href="/products"
-              className="rounded-lg px-3 py-2 text-foreground transition-[color,box-shadow] hover:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#737373]"
-            >
-              Browse
-            </Link>
-            <Link
-              href="#about"
-              className="rounded-lg px-3 py-2 text-foreground transition-[color,box-shadow] hover:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#737373]"
-            >
-              About
-            </Link>
-            <Link
-              href="#reviews"
-              className="rounded-lg px-3 py-2 text-foreground transition-[color,box-shadow] hover:shadow-[inset_2px_2px_4px_#c5c5c5,inset_-2px_-2px_4px_#ffffff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#737373]"
-            >
-              Reviews
-            </Link>
-          </div>
-        </nav>
-      </header>
-      <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-md min-h-[430px] h-auto shadow-[0_20px_45px_rgba(15,23,42,0.12)] border-0 ring-0 bg-card">
-        <CardHeader className="pt-5 pr-8 pl-8">          <CardTitle className="text-3xl font-bold">
-            Create Account
-          </CardTitle>
-          <CardDescription className="text-left text-sm text-muted-foreground pt-1.5 pb-2">
-            Register a new account to get started.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleRegister}>
-          <CardContent className="space-y-4 px-8">
-            {error && (
-              <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950/50 rounded-md border border-red-200 dark:border-red-900">
-                {error}
-              </div>
-            )}
-            <div className="space-y-2 text-left">
-              <Label htmlFor="username" className="text-sm">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                className="border-foreground/30"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                className="border-foreground/30"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4 px-8 pb-5">
-            <Button type="submit" className="h-11 w-full border-0 bg-gradient-to-r from-[#f97316] to-[#c2410c] text-white shadow-[0_4px_10px_rgba(194,65,12,0.25)] transition-all hover:from-[#ea580c] hover:to-[#9a3412] hover:shadow-[0_5px_12px_rgba(194,65,12,0.3)]" disabled={loading}>
-              {loading ? "Registering..." : "Register"}
-            </Button>
-            <div className="w-full border-t-1 border-foreground/20" />
-            <p className="text-sm text-center text-muted-foreground">
-              Already have an account?{" "}
-              <Link href={CONFIG.ROUTES.LOGIN} className="text-primary underline">
-                Login
-              </Link>
+          <Image
+            src={shopLogo}
+            alt="OSHOPPE"
+            fill
+            priority
+            sizes="132px"
+            className="object-contain object-left"
+          />
+        </Link>
+      </div>
+      <div className="relative isolate grid w-full max-w-[900px] grid-cols-1 gap-5 overflow-hidden rounded-[24px] border border-white/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.74)_0%,rgba(255,255,255,0.48)_48%,rgba(255,255,255,0.62)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.98),inset_0_-1px_0_rgba(255,255,255,0.72),0_24px_65px_rgba(38,32,14,0.2)] backdrop-blur-2xl before:pointer-events-none before:absolute before:inset-0 before:rounded-[inherit] before:bg-[linear-gradient(120deg,rgba(255,255,255,0.32)_0%,transparent_38%,rgba(255,255,255,0.12)_72%,transparent_100%)] before:content-[''] sm:p-6 md:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)] md:gap-10 md:p-7">
+        <section className="relative z-10 flex min-h-[340px] overflow-hidden rounded-[17px] md:min-h-[520px]">
+          <Image
+            src={promoImage}
+            alt="A shopper browsing products on a phone"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, 380px"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(145deg,rgba(249,115,22,0.22)_0%,transparent_48%),linear-gradient(to_top,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.1)_55%,rgba(0,0,0,0.08)_100%)]" />
+          <div className="relative z-10 mt-auto w-full px-7 pb-9 text-white sm:px-8">
+            <h2 className="border-b border-white/50 pb-3 text-[1.75rem] font-medium uppercase leading-[1.05] tracking-tight sm:text-[2rem]">
+              Great <strong className="font-bold italic">deals</strong>,
+              <br />
+              great <strong className="font-bold italic">finds</strong>
+            </h2>
+            <p className="mt-4 max-w-[270px] text-[0.82rem] font-medium leading-[1.6] sm:text-sm">
+              Discover great products and keep your shopping orders all in one place.
             </p>
-          </CardFooter>
-        </form>
-      </Card>
-      </main>
-    </div>
+          </div>
+        </section>
+
+        <section className="relative z-10 flex items-center px-2 py-6 sm:px-7 md:px-0">
+          <div className="mx-auto w-full max-w-[380px]">
+            <Image
+              src={registerBag}
+              alt=""
+              width={42}
+              height={46}
+              className="mb-5 h-11 w-10 object-contain"
+            />
+            <h1 className="text-[1.75rem] font-bold leading-tight text-[#111] sm:text-[2rem]">
+              Get Started
+            </h1>
+            <p className="mt-1.5 text-xs leading-[1.6] text-[#777263] sm:text-sm">
+              Welcome to OSHOPPE! Let&apos;s get started.
+            </p>
+
+            <form onSubmit={handleRegister} className="mt-5">
+              {error && (
+                <div
+                  role="alert"
+                  className="mb-3 rounded-md border border-red-200 bg-red-50 p-2.5 text-xs text-red-600"
+                >
+                  {error}
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="username"
+                  className="text-xs font-medium text-[#1b1b1b] sm:text-sm"
+                >
+                  Create a username
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  autoComplete="username"
+                  className="h-10 rounded-md border-[#a8a29e] bg-white text-sm focus-visible:border-[#c2410c] focus-visible:ring-[#c2410c]/30"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mt-3 space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-xs font-medium text-[#1b1b1b] sm:text-sm"
+                >
+                  Create a password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  className="h-10 rounded-md border-[#a8a29e] bg-white text-sm focus-visible:border-[#c2410c] focus-visible:ring-[#c2410c]/30"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button
+                type="submit"
+                className="mt-5 h-11 w-full rounded-md border-0 bg-gradient-to-r from-[#f97316] via-[#e65312] to-[#9a3412] text-sm font-semibold text-white shadow-[0_4px_12px_rgba(154,52,18,0.2)] transition-all hover:from-[#ea580c] hover:via-[#c2410c] hover:to-[#7c2d12]"
+                disabled={loading}
+              >
+                {loading ? "Creating account..." : "Create an account"}
+              </Button>
+              <div className="my-4 flex items-center gap-3 text-xs text-[#858174]">
+                <span className="h-px flex-1 bg-[#e9e7e2]" />
+                <span>Or</span>
+                <span className="h-px flex-1 bg-[#e9e7e2]" />
+              </div>
+              <div
+                role="img"
+                aria-label="Apple, Google, and Facebook"
+                className="grid grid-cols-3 gap-4"
+              >
+                {[
+                  ["apple", "Apple"],
+                  ["google", "Google"],
+                  ["facebook", "Facebook"],
+                ].map(([icon, provider]) => (
+                  <span
+                    key={provider}
+                    className="flex h-[38px] items-center justify-center rounded-md border border-[#dedbd5] bg-white"
+                  >
+                    <Image
+                      src={`/${icon}.png`}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="h-5 w-5 object-contain"
+                    />
+                  </span>
+                ))}
+              </div>
+              <p className="mt-4 text-center text-xs text-[#858174] sm:text-sm">
+                Already have an account?{" "}
+                <Link
+                  href={CONFIG.ROUTES.LOGIN}
+                  className="font-semibold text-[#df3f13] underline"
+                >
+                  Login
+                </Link>
+              </p>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }

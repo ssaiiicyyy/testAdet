@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Activity,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
@@ -134,15 +136,15 @@ function formatDate(value: string | null) {
 function statusStyle(status: string) {
   const normalized = status.trim().toLowerCase();
   if (normalized.includes("complete") || normalized.includes("paid")) {
-    return "bg-[#e5e5e5] text-[#171717]";
+    return "bg-[#e7f5e9] text-[#256b35]";
   }
   if (normalized.includes("pending")) {
-    return "bg-[#d4d4d4] text-[#171717]";
+    return "border border-[#ffc95c] bg-[#fff4d6] text-[#8a5900]";
   }
   if (normalized.includes("cancel")) {
-    return "bg-[#737373] text-white";
+    return "bg-[#fee7e3] text-[#a83420]";
   }
-  return "bg-[#f5f5f5] text-[#262626]";
+  return "bg-[#f5eee8] text-[#684c3d]";
 }
 
 function SummaryCard({
@@ -163,19 +165,19 @@ function SummaryCard({
   return (
     <article
       id={id}
-      className="group/card scroll-mt-24 rounded-2xl border border-[#eeeeee] bg-[#e5e5e5] p-4 shadow-[8px_8px_16px_#c5c5c5,-8px_-8px_16px_#ffffff] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[12px_12px_22px_#c5c5c5,-12px_-12px_22px_#ffffff] active:translate-y-0 motion-reduce:transition-none sm:p-5"
+      className="group/card scroll-mt-24 rounded-2xl border border-[#f2e5d9] bg-white p-4 shadow-[0_6px_18px_rgba(115,70,30,0.1)] transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(115,70,30,0.14)] active:translate-y-0 motion-reduce:transition-none sm:p-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className={`rounded-lg p-2.5 transition-transform duration-200 group-hover/card:scale-105 motion-reduce:transition-none ${iconClass}`}>
           <Icon aria-hidden="true" size={20} />
         </div>
-        <Activity aria-hidden="true" className="text-[#a3a3a3]" size={19} />
+        <Activity aria-hidden="true" className="text-[#d6c9bf]" size={19} />
       </div>
-      <p className="mt-4 text-sm font-medium text-[#525252]">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight text-[#0a0a0a]">
+      <p className="mt-4 text-sm font-medium text-[#684c3d]">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-[#21140f]">
         {value}
       </p>
-      <p className="mt-1 text-xs text-[#737373]">{detail}</p>
+      <p className="mt-1 text-xs text-[#8b7569]">{detail}</p>
     </article>
   );
 }
@@ -323,8 +325,8 @@ export default function DashboardPage() {
 
   if (isChecking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#e5e5e5]">
-        <p className="text-sm text-[#737373]">Verifying session...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#fff7ed]">
+        <p className="text-sm text-[#8b7569]">Verifying session...</p>
       </div>
     );
   }
@@ -332,21 +334,21 @@ export default function DashboardPage() {
   const summary = dashboard?.summary;
 
   return (
-    <div className="min-h-screen bg-[#e5e5e5] text-[#171717] lg:flex">
-      <aside className="relative z-20 flex w-full shrink-0 flex-col border-[#0a0a0a] bg-[#171717] px-4 py-4 text-white shadow-[4px_4px_10px_#0d0d0d,-3px_-3px_8px_#202020] lg:fixed lg:inset-y-0 lg:left-0 lg:w-60 lg:border-r lg:px-3 lg:py-6 lg:shadow-[5px_0_12px_#0d0d0d,-3px_0_8px_#202020]">
+    <div className="min-h-screen bg-[#fff7ed] text-[#2b1d16] lg:flex">
+      <aside className="relative z-20 flex w-full shrink-0 flex-col border-[#f1e7df] bg-white px-4 py-4 text-[#513a2e] shadow-[0_2px_12px_rgba(79,45,20,0.06)] lg:fixed lg:inset-y-0 lg:left-0 lg:w-44 lg:border-r lg:px-3 lg:py-6 lg:shadow-[2px_0_14px_rgba(79,45,20,0.06)]">
         <a
           href="#dashboard"
-          className="mb-4 flex items-center gap-3 px-2 py-1 lg:mb-8"
+          aria-label="OSHOPPE dashboard"
+          className="mb-4 flex items-center px-2 py-1 lg:mb-8"
         >
-          <span className="grid size-10 place-items-center rounded-lg bg-[#171717] text-white shadow-[inset_2px_2px_4px_#0a0a0a,inset_-2px_-2px_4px_#262626]">
-            <Package aria-hidden="true" size={24} />
-          </span>
-          <span>
-            <span className="block text-lg font-bold leading-tight">OSHOPPE</span>
-            <span className="block text-[11px] text-[#a3a3a3]">
-              Online Ordering System
-            </span>
-          </span>
+          <Image
+            src="/oshoppe-logo.png"
+            alt="OSHOPPE Online Ordering System"
+            width={640}
+            height={640}
+            priority
+            className="h-[52px] w-[132px] object-cover object-[center_42%]"
+          />
         </a>
 
         <nav
@@ -360,8 +362,8 @@ export default function DashboardPage() {
               aria-current={index === 0 ? "page" : undefined}
               className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                 index === 0
-                  ? "bg-[#171717] text-white shadow-[inset_2px_2px_5px_#0a0a0a,inset_-2px_-2px_5px_#262626]"
-                  : "text-[#d4d4d4] hover:bg-[#1c1c1c] hover:text-white hover:shadow-[2px_2px_5px_#0a0a0a,-2px_-2px_5px_#262626]"
+                  ? "border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(255,240,232,0.76)_55%,rgba(255,220,198,0.62)_100%)] text-[#c83f08] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_4px_12px_rgba(200,63,8,0.12)] backdrop-blur-md"
+                  : "text-[#61493d] hover:bg-[#fff7f2] hover:text-[#c83f08]"
               }`}
             >
               <Icon aria-hidden="true" size={18} />
@@ -373,38 +375,38 @@ export default function DashboardPage() {
         <button
           type="button"
           onClick={handleLogout}
-          className="mt-3 flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#d4d4d4] transition-all hover:bg-[#1c1c1c] hover:text-white hover:shadow-[2px_2px_5px_#0a0a0a,-2px_-2px_5px_#262626] lg:mt-4"
+          className="mt-3 flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#61493d] transition-colors hover:bg-[#fff7f2] hover:text-[#c83f08] lg:mt-4"
         >
           <LogOut aria-hidden="true" size={18} />
           Log out
         </button>
       </aside>
 
-      <main id="dashboard" className="min-w-0 flex-1 lg:ml-60">
-        <header className="sticky top-0 z-10 flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[#0a0a0a] bg-[#171717] px-4 py-3 text-white shadow-[3px_3px_8px_#0d0d0d,-2px_-2px_6px_#202020] sm:px-6 lg:px-8">
-          <label className="group/search flex h-10 w-10 shrink-0 cursor-text items-center justify-end gap-2 overflow-hidden rounded-full border border-transparent bg-[#171717] px-2 text-white shadow-[inset_2px_2px_5px_#0a0a0a,inset_-2px_-2px_5px_#262626] transition-[width,border-color,padding] duration-300 hover:w-72 hover:border-[#373737] hover:px-4 focus-within:w-72 focus-within:border-[#373737] focus-within:px-4 sm:hover:w-80 sm:focus-within:w-80">
+      <main id="dashboard" className="min-w-0 flex-1 lg:ml-44">
+        <header className="sticky top-0 z-10 flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-[#f1e7df] bg-[#fff7ed] px-4 py-3 text-[#513a2e] sm:px-6 lg:px-8">
+          <label className="flex h-10 w-full max-w-[296px] shrink-0 cursor-text items-center gap-2 rounded-full border border-[#e7d8cb] bg-white px-3 text-[#513a2e] shadow-sm focus-within:border-[#c83f08]">
             <input
               type="search"
-              aria-label="Search orders"
-              placeholder="Search orders, customers, products..."
+              aria-label="Search orders, products, customers"
+              placeholder="Search orders, products, customers"
               value={query}
               onChange={(event) => {
                 setQuery(event.target.value);
                 setCurrentPage(1);
               }}
-              className="min-w-0 flex-1 bg-transparent text-sm text-white opacity-0 outline-none transition-opacity duration-200 placeholder:text-white/25 group-hover/search:opacity-100 group-focus-within/search:opacity-100"
+              className="min-w-0 flex-1 bg-transparent text-xs text-[#513a2e] outline-none placeholder:text-[#9b887d]"
             />
             {query && (
               <button
                 type="button"
                 aria-label="Clear search"
                 onClick={() => setQuery("")}
-                className="rounded-full px-1 text-[#d4d4d4] hover:bg-[#262626]"
+                className="rounded-full px-1 text-[#8b7569] hover:bg-[#fff0e8]"
               >
                 <span aria-hidden="true">×</span>
               </button>
             )}
-            <Search aria-hidden="true" className="shrink-0" size={20} />
+            <Search aria-hidden="true" className="shrink-0" size={16} />
           </label>
 
           <div className="flex items-center gap-3 sm:gap-5">
@@ -412,7 +414,7 @@ export default function DashboardPage() {
               type="button"
               aria-label="Profile"
               title="Profile"
-              className="rounded-full bg-[#171717] p-2 text-white shadow-[2px_2px_5px_#0a0a0a,-2px_-2px_5px_#262626] transition-shadow hover:shadow-[inset_2px_2px_4px_#0a0a0a,inset_-2px_-2px_4px_#262626]"
+              className="rounded-full border border-[#e7d8cb] bg-white p-2 text-[#513a2e] shadow-sm transition-colors hover:bg-[#fff0e8]"
             >
               <UserRound aria-hidden="true" size={20} />
             </button>
@@ -420,35 +422,36 @@ export default function DashboardPage() {
               type="button"
               aria-label="Settings"
               title="Settings"
-              className="rounded-full bg-[#171717] p-2 text-white shadow-[2px_2px_5px_#0a0a0a,-2px_-2px_5px_#262626] transition-shadow hover:shadow-[inset_2px_2px_4px_#0a0a0a,inset_-2px_-2px_4px_#262626]"
+              className="rounded-full border border-[#e7d8cb] bg-white p-2 text-[#513a2e] shadow-sm transition-colors hover:bg-[#fff0e8]"
             >
               <Settings aria-hidden="true" size={20} />
             </button>
           </div>
         </header>
 
-        <div className="mx-auto max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl text-[#737373] pb-2">
+              <p className="pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c83f08]">
                 Dashboard
+              </p>
+              <h1 className="font-sans text-3xl font-bold uppercase leading-none tracking-tight text-[#171717] sm:text-5xl">
+                Hello, welcome back!
               </h1>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-                HELLO, WELCOME BACK!
-              </h1>
-              <p className="mt-1 text-sm text-[#737373]">
+              <p className="mt-2 text-xs text-[#8b7569] sm:text-sm">
                 Overview of your orders, products, and customers
               </p>
             </div>
-            <div className="rounded-lg border border-[#e5e5e5] bg-white px-3 py-2 text-sm text-[#525252] shadow-sm">
+            <div className="flex items-center gap-2 rounded-lg border border-[#e7d8cb] bg-white px-3 py-2 text-xs text-[#513a2e] shadow-sm">
               All-time totals
+              <ChevronDown aria-hidden="true" size={14} />
             </div>
           </div>
 
           {error && (
             <div
               role="alert"
-              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#d4d4d4] bg-[#f5f5f5] px-4 py-3 text-sm text-[#262626]"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#f0c7b1] bg-[#fff0e8] px-4 py-3 text-sm text-[#83310d]"
             >
               <span>{error}</span>
               <button
@@ -461,7 +464,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <section aria-label="Business summary" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <section aria-label="Business summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
            <SummaryCard
   id="total-orders"
   label="Total Orders"
@@ -500,18 +503,18 @@ export default function DashboardPage() {
           <section
             id="recent-orders"
             aria-labelledby="orders-heading"
-            className="scroll-mt-24 overflow-hidden rounded-2xl border border-[#e5e5e5] bg-[#d4d4d4] text-[#171717] shadow-[8px_8px_16px_#b8b8b8,-8px_-8px_16px_#eeeeee]"
+            className="scroll-mt-24 overflow-hidden rounded-2xl border border-[#f2e5d9] bg-white text-[#2b1d16] shadow-[0_6px_20px_rgba(115,70,30,0.1)]"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d4d4d4] px-4 py-4 sm:px-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1e7df] px-4 py-4 sm:px-5">
               <h2
                 id="orders-heading"
-                className="flex items-center gap-2 text-base font-semibold"
+                className="flex items-center gap-2 text-sm font-semibold"
               >
-                <ShoppingCart aria-hidden="true" size={19} />
+                <ShoppingCart aria-hidden="true" className="text-[#c83f08]" size={16} />
                 Recent Orders
               </h2>
               <div className="flex items-center gap-2">
-                <label className="flex items-center gap-1.5 rounded-md border border-[#c5c5c5] bg-[#d4d4d4] px-2.5 py-2 text-xs text-[#525252] shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#eeeeee]">
+                <label className="flex items-center gap-1.5 rounded-md border border-[#e7d8cb] bg-white px-2.5 py-2 text-xs text-[#684c3d]">
                   <Filter aria-hidden="true" size={14} />
                   <span className="sr-only">Filter by status</span>
                   <select
@@ -520,7 +523,7 @@ export default function DashboardPage() {
                       setStatusFilter(event.target.value);
                       setCurrentPage(1);
                     }}
-                    className="max-w-28 bg-transparent text-[#262626] outline-none"
+                    className="max-w-28 bg-transparent text-[#513a2e] outline-none"
                   >
                     <option value="all">All statuses</option>
                     {statuses.map((status) => (
@@ -534,7 +537,7 @@ export default function DashboardPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={filteredOrders.length === 0}
-                  className="flex items-center gap-1.5 rounded-md bg-[#171717] px-3 py-2 text-xs font-semibold text-white shadow-[3px_3px_6px_#c5c5c5,-3px_-3px_6px_#ffffff] transition hover:-translate-y-0.5 hover:bg-[#262626] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-md bg-[#c83f08] px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#a93408] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Download aria-hidden="true" size={14} />
                   Export
@@ -544,7 +547,7 @@ export default function DashboardPage() {
 
             <div className="overflow-x-auto">
               <table className="w-full min-w-[850px] border-collapse text-left text-xs">
-                <thead className="bg-[#c9c9c9] text-[#262626]">
+                <thead className="bg-[#fbf2e8] text-[#684c3d]">
                   <tr>
                     {["Order ID", "Customer", "Product", "Quantity", "Status", "Order Date", "Total", "Actions"].map((heading) => (
                       <th key={heading} scope="col" className="px-3 py-3 font-semibold sm:px-4">
@@ -553,41 +556,41 @@ export default function DashboardPage() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#d4d4d4]">
+                <tbody className="divide-y divide-[#f1e7df]">
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-[#737373]">
+                      <td colSpan={8} className="px-4 py-12 text-center text-[#8b7569]">
                         Loading orders...
                       </td>
                     </tr>
                   ) : visibleOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-12 text-center text-[#737373]">
+                      <td colSpan={8} className="px-4 py-12 text-center text-[#8b7569]">
                         {error ? "Order data is unavailable." : "No orders match your search."}
                       </td>
                     </tr>
                   ) : (
                     visibleOrders.map((order) => (
-                      <tr key={order.orderId} className="transition-colors hover:bg-[#eeeeee]">
-                        <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-[#404040] sm:px-4">
+                      <tr key={order.orderId} className="transition-colors hover:bg-[#fffaf6]">
+                        <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-[#513a2e] sm:px-4">
                           ORD-{order.orderId}
                         </td>
-                        <td className="max-w-44 truncate px-3 py-3.5 font-medium text-[#262626] sm:px-4">
+                        <td className="max-w-44 truncate px-3 py-3.5 font-medium text-[#513a2e] sm:px-4">
                           {order.customerName || "—"}
                         </td>
-                        <td className="max-w-52 truncate px-3 py-3.5 text-[#525252] sm:px-4">
+                        <td className="max-w-52 truncate px-3 py-3.5 text-[#684c3d] sm:px-4">
                           {order.productName || "—"}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3.5 text-[#404040] sm:px-4">{order.quantity}</td>
+                        <td className="whitespace-nowrap px-3 py-3.5 text-[#684c3d] sm:px-4">{order.quantity}</td>
                         <td className="px-3 py-3.5 sm:px-4">
                           <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${statusStyle(order.status)}`}>
                             {order.status.replaceAll("_", " ")}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3.5 text-[#404040] sm:px-4">
+                        <td className="whitespace-nowrap px-3 py-3.5 text-[#684c3d] sm:px-4">
                           {formatDate(order.orderDate)}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3.5 text-[#404040] sm:px-4">
+                        <td className="whitespace-nowrap px-3 py-3.5 font-semibold text-[#513a2e] sm:px-4">
                           {formatAmount(order.totalAmount)}
                         </td>
                         <td className="px-3 py-3.5 sm:px-4">
@@ -596,7 +599,7 @@ export default function DashboardPage() {
                             onClick={() => void handleCopyOrder(order)}
                             aria-label={`Copy order number ${order.orderId}`}
                             title={copiedOrder === order.orderId ? "Copied" : "Copy order number"}
-                            className="rounded p-1.5 text-[#737373] transition-colors hover:bg-[#e5e5e5] hover:text-[#171717]"
+                            className="rounded-full border border-[#eaded4] p-1.5 text-[#806b5e] transition-colors hover:bg-[#fff0e8] hover:text-[#c83f08]"
                           >
                             {copiedOrder === order.orderId ? (
                               <Check aria-hidden="true" size={15} />
@@ -612,7 +615,7 @@ export default function DashboardPage() {
               </table>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#d4d4d4] px-4 py-3 text-xs text-[#737373] sm:px-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#f1e7df] px-4 py-3 text-xs text-[#8b7569] sm:px-5">
               <p>
                 Showing {firstVisible} to {lastVisible} of {filteredOrders.length} entries
               </p>
@@ -625,7 +628,7 @@ export default function DashboardPage() {
                       setPageSize(Number(event.target.value));
                       setCurrentPage(1);
                     }}
-                    className="rounded-md border border-[#c5c5c5] bg-[#d4d4d4] px-2 py-1.5 text-[#262626] shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#eeeeee]"
+                    className="rounded-md border border-[#e7d8cb] bg-white px-2 py-1.5 text-[#513a2e]"
                     aria-label="Rows per page"
                   >
                     {pageSizeOptions.map((option) => (
@@ -641,11 +644,11 @@ export default function DashboardPage() {
                     aria-label="Previous page"
                     disabled={currentPage <= 1}
                     onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                    className="rounded p-1.5 hover:bg-[#d4d4d4] disabled:opacity-40"
+                    className="rounded p-1.5 hover:bg-[#fff0e8] disabled:opacity-40"
                   >
                     <ChevronLeft aria-hidden="true" size={16} />
                   </button>
-                  <span className="min-w-7 rounded bg-[#d4d4d4] px-2 py-1.5 text-center font-semibold text-[#171717] shadow-[inset_2px_2px_4px_#b8b8b8,inset_-2px_-2px_4px_#eeeeee]">
+                  <span className="min-w-7 rounded bg-[#fff0e8] px-2 py-1.5 text-center font-semibold text-[#c83f08]">
                     {currentPage}
                   </span>
                   <span className="px-1">of {totalPages}</span>
@@ -654,7 +657,7 @@ export default function DashboardPage() {
                     aria-label="Next page"
                     disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                    className="rounded p-1.5 hover:bg-[#d4d4d4] disabled:opacity-40"
+                    className="rounded p-1.5 hover:bg-[#fff0e8] disabled:opacity-40"
                   >
                     <ChevronRight aria-hidden="true" size={16} />
                   </button>
@@ -663,7 +666,7 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          <p className="text-center text-xs text-[#a3a3a3]">
+          <p className="text-center text-xs text-[#9b887d]">
             Summary based on your orders, products, and customers.
           </p>
         </div>
