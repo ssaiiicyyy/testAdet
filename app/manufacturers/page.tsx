@@ -1,21 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Building2,
-  LogOut,
-  Pencil,
-  Plus,
-  Trash2,
-  X,
-} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Building2, Pencil, Plus, Trash2 } from "lucide-react";
+import { AdminPageShell, CrudModal } from "@/components/admin-ui";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { apiClient } from "@/lib/api";
-import { clearTokens } from "@/lib/auth";
-import { CONFIG } from "@/lib/config";
 
 interface Manufacturer {
   manufacturers_id: number | string;
@@ -23,11 +12,12 @@ interface Manufacturer {
 }
 
 export default function ManufacturersPage() {
-  const router = useRouter();
   const { isChecking } = useAuthGuard();
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([]);
   const [name, setName] = useState("");
+  const [query, setQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +32,6 @@ export default function ManufacturersPage() {
       setError("");
       try {
         const data = await apiClient<Manufacturer[]>("/manufacturers", {
-          method: "GET",
           requiresAuth: true,
         });
         if (active) setManufacturers(data);
@@ -64,6 +53,14 @@ export default function ManufacturersPage() {
       active = false;
     };
   }, [isChecking]);
+
+  const closeForm = useCallback(() => {
+    if (mutating) return;
+    setIsFormOpen(false);
+    setEditingId(null);
+    setName("");
+    setError("");
+  }, [mutating]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -100,8 +97,9 @@ export default function ManufacturersPage() {
         );
         setSuccess("Manufacturer updated successfully.");
       }
-      setName("");
+      setIsFormOpen(false);
       setEditingId(null);
+      setName("");
     } catch (saveError: unknown) {
       setError(
         saveError instanceof Error
@@ -111,6 +109,14 @@ export default function ManufacturersPage() {
     } finally {
       setMutating(false);
     }
+  };
+
+  const handleEdit = (manufacturer: Manufacturer) => {
+    setEditingId(Number(manufacturer.manufacturers_id));
+    setName(manufacturer.manufacturers_name);
+    setError("");
+    setSuccess("");
+    setIsFormOpen(true);
   };
 
   const handleDelete = async (manufacturer: Manufacturer) => {
@@ -125,22 +131,14 @@ export default function ManufacturersPage() {
         { method: "DELETE", requiresAuth: true },
       );
       if (!deleted) {
-        setError(
-          "The manufacturer was not deleted; it may already have been removed.",
-        );
+        setError("The manufacturer was not deleted; it may already be removed.");
         return;
       }
-
       setManufacturers((current) =>
         current.filter(
-          (item) =>
-            item.manufacturers_id !== manufacturer.manufacturers_id,
+          (item) => item.manufacturers_id !== manufacturer.manufacturers_id,
         ),
       );
-      if (editingId === Number(manufacturer.manufacturers_id)) {
-        setEditingId(null);
-        setName("");
-      }
       setSuccess("Manufacturer deleted successfully.");
     } catch (deleteError: unknown) {
       setError(
@@ -153,219 +151,212 @@ export default function ManufacturersPage() {
     }
   };
 
-  const handleLogout = () => {
-    clearTokens();
-    router.replace(CONFIG.ROUTES.LOGIN);
-    router.refresh();
-  };
+  const visibleManufacturers = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return manufacturers.filter((manufacturer) =>
+      [manufacturer.manufacturers_id, manufacturer.manufacturers_name].some(
+        (value) => String(value ?? "").toLowerCase().includes(normalizedQuery),
+      ),
+    );
+  }, [manufacturers, query]);
 
   if (isChecking) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#e5e5e5]">
-        <p className="text-sm text-[#737373]">Verifying session...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#fff9ed]">
+        <p className="text-sm text-[#8b7569]">Verifying session...</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#e5e5e5] px-4 py-6 text-[#171717] sm:px-8">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <Link
-              href={CONFIG.ROUTES.DASHBOARD}
-              className="mb-3 inline-flex items-center gap-2 text-sm text-[#525252] hover:text-[#171717]"
-            >
-              <ArrowLeft aria-hidden="true" size={16} />
-              Dashboard
-            </Link>
-            <h1 className="flex items-center gap-2 text-3xl font-bold">
-              <Building2 aria-hidden="true" size={26} />
-              Manufacturers
-            </h1>
-            <p className="mt-1 text-sm text-[#737373]">
-              Manage the manufacturers linked to your products.
-            </p>
-          </div>
+    <AdminPageShell
+      activePage="Manufacturers"
+      searchLabel="Search manufacturers"
+      searchPlaceholder="Search manufacturers"
+      query={query}
+      onQueryChange={setQuery}
+    >
+      <section
+        aria-labelledby="manufacturers-heading"
+        className="flex flex-wrap items-end justify-between gap-4"
+      >
+        <div>
+          <p className="pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c83f08]">
+            Manufacturers
+          </p>
+          <h1
+            id="manufacturers-heading"
+            className="text-3xl font-bold uppercase leading-none tracking-tight text-[#171717] sm:text-4xl"
+          >
+            Manage Manufacturers
+          </h1>
+          <p className="mt-2 text-xs text-[#684c3d] sm:text-sm">
+            Manage the manufacturers linked to your products.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setName("");
+            setError("");
+            setSuccess("");
+            setIsFormOpen(true);
+          }}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#ff6a00] to-[#c83f08] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:from-[#f45a00] hover:to-[#a93408]"
+        >
+          <Plus aria-hidden="true" size={14} />
+          Add Manufacturer
+        </button>
+      </section>
+
+      {error && !isFormOpen && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          <span>{error}</span>
           <button
             type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#171717] px-4 py-2 text-sm font-medium text-white hover:bg-[#262626]"
+            onClick={() => window.location.reload()}
+            className="font-semibold underline underline-offset-2"
           >
-            <LogOut aria-hidden="true" size={16} />
-            Log out
+            Retry
           </button>
-        </header>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mb-6 rounded-2xl border border-[#d4d4d4] bg-white p-4 shadow-sm sm:p-5"
+        </div>
+      )}
+      {success && (
+        <p
+          role="status"
+          className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">
-              {editingId === null
-                ? "Add manufacturer"
-                : `Edit manufacturer #${editingId}`}
-            </h2>
-            {editingId !== null && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setName("");
-                  setError("");
-                  setSuccess("");
-                }}
-                disabled={mutating}
-                className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[#525252] hover:bg-[#f5f5f5] disabled:opacity-50"
-              >
-                <X aria-hidden="true" size={16} />
-                Cancel
-              </button>
+          {success}
+        </p>
+      )}
+
+      <section
+        aria-label="Manufacturers"
+        className="overflow-x-auto rounded-2xl border border-[#f2e5d9] bg-white shadow-[0_6px_18px_rgba(115,70,30,0.1)]"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-[#f1e7df] px-4 py-3">
+          <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <Building2 aria-hidden="true" size={16} />
+            Manufacturer Directory
+          </h2>
+          <span className="text-xs text-[#8b7569]">
+            {visibleManufacturers.length}{" "}
+            {visibleManufacturers.length === 1 ? "manufacturer" : "manufacturers"}
+          </span>
+        </div>
+        <table className="w-full min-w-[480px] border-collapse text-left text-xs">
+          <thead className="bg-[#fbf2e8] text-[#684c3d]">
+            <tr>
+              {["Manufacturer ID", "Manufacturer", "Actions"].map((heading) => (
+                <th key={heading} scope="col" className="px-4 py-3 font-semibold">
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#f1e7df]">
+            {loading ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-12 text-center text-[#8b7569]">
+                  Loading manufacturers...
+                </td>
+              </tr>
+            ) : visibleManufacturers.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-4 py-12 text-center text-[#8b7569]">
+                  {error
+                    ? "Manufacturer data is unavailable."
+                    : query
+                      ? "No manufacturers match your search."
+                      : "No manufacturers have been added."}
+                </td>
+              </tr>
+            ) : (
+              visibleManufacturers.map((manufacturer) => (
+                <tr
+                  key={manufacturer.manufacturers_id}
+                  className="transition-colors hover:bg-[#fffaf6]"
+                >
+                  <td className="px-4 py-3.5 font-semibold text-[#513a2e]">
+                    {manufacturer.manufacturers_id}
+                  </td>
+                  <td className="px-4 py-3.5 font-medium text-[#513a2e]">
+                    {manufacturer.manufacturers_name}
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(manufacturer)}
+                        disabled={mutating}
+                        aria-label={`Edit ${manufacturer.manufacturers_name}`}
+                        className="rounded-lg border border-[#e7d8cb] p-2 text-[#684c3d] transition-colors hover:bg-[#fff4e8] disabled:opacity-50"
+                      >
+                        <Pencil aria-hidden="true" size={15} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete(manufacturer)}
+                        disabled={mutating}
+                        aria-label={`Delete ${manufacturer.manufacturers_name}`}
+                        className="rounded-lg border border-red-200 p-2 text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50"
+                      >
+                        <Trash2 aria-hidden="true" size={15} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             )}
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <label className="flex-1 text-sm font-medium text-[#404040]">
-              Manufacturer name
+          </tbody>
+        </table>
+      </section>
+
+      {isFormOpen && (
+        <CrudModal
+          title={editingId === null ? "Add Manufacturer" : `Edit Manufacturer #${editingId}`}
+          onClose={closeForm}
+          busy={mutating}
+        >
+          {error && (
+            <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+              {error}
+            </p>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <label className="block text-xs font-medium text-[#513a2e]">
+              Manufacturer Name
               <input
                 required
                 maxLength={255}
+                autoFocus
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 disabled={mutating}
-                className="mt-1 w-full rounded-lg border border-[#d4d4d4] px-3 py-2 font-normal outline-none focus:border-[#c83f08] disabled:bg-[#f5f5f5]"
+                placeholder="e.g. Acme Supplies"
+                className="mt-1.5 h-9 w-full rounded-md border border-[#d4d4d4] px-3 text-xs font-normal outline-none transition-colors focus:border-[#c83f08] focus:ring-2 focus:ring-[#ff6a00]/15 disabled:bg-[#f5f5f5]"
               />
             </label>
-            <div className="flex items-end">
+            <div className="flex justify-end pt-2">
               <button
                 type="submit"
                 disabled={mutating || loading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#c83f08] px-4 py-2 text-sm font-semibold text-white hover:bg-[#a93408] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#ff6a00] to-[#c83f08] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:from-[#f45a00] hover:to-[#a93408] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {editingId === null ? (
-                  <Plus aria-hidden="true" size={16} />
-                ) : (
-                  <Pencil aria-hidden="true" size={16} />
-                )}
                 {mutating
                   ? "Saving..."
                   : editingId === null
-                    ? "Add manufacturer"
-                    : "Save changes"}
+                    ? "Add Manufacturer"
+                    : "Save Changes"}
               </button>
             </div>
-          </div>
-        </form>
-
-        {error && (
-          <div
-            role="alert"
-            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-          >
-            <span>{error}</span>
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="font-semibold underline underline-offset-2"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-        {success && (
-          <p
-            role="status"
-            className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-          >
-            {success}
-          </p>
-        )}
-
-        <section
-          aria-label="Manufacturers"
-          className="overflow-x-auto rounded-2xl border border-[#d4d4d4] bg-white shadow-sm"
-        >
-          <table className="w-full min-w-[480px] border-collapse text-left text-sm">
-            <thead className="bg-[#f5f5f5] text-[#525252]">
-              <tr>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Manufacturer ID
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Manufacturer
-                </th>
-                <th scope="col" className="px-4 py-3 font-semibold">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#eeeeee]">
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="px-4 py-12 text-center text-[#737373]"
-                  >
-                    Loading manufacturers...
-                  </td>
-                </tr>
-              ) : manufacturers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="px-4 py-12 text-center text-[#737373]"
-                  >
-                    {error
-                      ? "Manufacturer data is unavailable."
-                      : "No manufacturers have been added."}
-                  </td>
-                </tr>
-              ) : (
-                manufacturers.map((manufacturer) => (
-                  <tr
-                    key={manufacturer.manufacturers_id}
-                    className="hover:bg-[#fafafa]"
-                  >
-                    <td className="px-4 py-3 font-semibold">
-                      {manufacturer.manufacturers_id}
-                    </td>
-                    <td className="px-4 py-3">
-                      {manufacturer.manufacturers_name}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={mutating}
-                          onClick={() => {
-                            setEditingId(Number(manufacturer.manufacturers_id));
-                            setName(manufacturer.manufacturers_name);
-                            setError("");
-                            setSuccess("");
-                          }}
-                          aria-label={`Edit ${manufacturer.manufacturers_name}`}
-                          className="rounded-lg border border-[#d4d4d4] p-2 text-[#525252] hover:bg-[#f5f5f5] disabled:opacity-50"
-                        >
-                          <Pencil aria-hidden="true" size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={mutating}
-                          onClick={() => void handleDelete(manufacturer)}
-                          aria-label={`Delete ${manufacturer.manufacturers_name}`}
-                          className="rounded-lg border border-red-200 p-2 text-red-700 hover:bg-red-50 disabled:opacity-50"
-                        >
-                          <Trash2 aria-hidden="true" size={15} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </section>
-      </div>
-    </main>
+          </form>
+        </CrudModal>
+      )}
+    </AdminPageShell>
   );
 }

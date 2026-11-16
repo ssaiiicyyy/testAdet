@@ -7,12 +7,14 @@ import Image from "next/image";
 import shopLogo from "../../Orange_and_Black_Bold_Grunge_Digital_Marketing_Presentation__1_-removebg-preview.png";
 import {
   Activity,
+  ArrowLeftRight,
   Building2,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Copy,
+  CreditCard,
   Download,
   Filter,
   LayoutDashboard,
@@ -74,8 +76,10 @@ const navigation: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Dashboard", href: "#dashboard", icon: LayoutDashboard },
   { label: "Orders", href: "#recent-orders", icon: ShoppingCart },
   { label: "Products", href: "/products", icon: Package },
+  { label: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+  { label: "Payments", href: "/payment", icon: CreditCard },
   { label: "Manufacturers", href: "/manufacturers", icon: Building2 },
-  { label: "Customers", href: "#customers", icon: UserRound },
+  { label: "Customers", href: "/customers", icon: UserRound },
 ];
 
 const pageSizeOptions = [5, 10, 20];

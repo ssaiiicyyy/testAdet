@@ -5,7 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
+  ArrowLeftRight,
   Building2,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   Package,
@@ -53,10 +55,12 @@ const navigation: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Dashboard", href: CONFIG.ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: "Orders", href: "/orders", icon: ShoppingCart },
   { label: "Products", href: "/products", icon: Package },
+  { label: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+  { label: "Payments", href: "/payment", icon: CreditCard },
   { label: "Manufacturers", href: "/manufacturers", icon: Building2 },
   {
     label: "Customers",
-    href: `${CONFIG.ROUTES.DASHBOARD}#customers`,
+    href: "/customers",
     icon: UserRound,
   },
 ];
@@ -79,6 +83,7 @@ export default function ProductsPage() {
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [mutating, setMutating] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     if (isChecking) return;
@@ -174,6 +179,7 @@ export default function ProductsPage() {
 
       setForm(emptyForm);
       setEditingId(null);
+      setIsFormOpen(false);
     } catch (saveError: unknown) {
       setError(
         saveError instanceof Error
@@ -194,6 +200,7 @@ export default function ProductsPage() {
     });
     setError("");
     setSuccess("");
+    setIsFormOpen(true);
   };
 
   const handleCancelEdit = () => {
@@ -201,6 +208,7 @@ export default function ProductsPage() {
     setForm(emptyForm);
     setError("");
     setSuccess("");
+    setIsFormOpen(false);
   };
 
   const handleDelete = async (product: Product) => {
@@ -236,6 +244,29 @@ export default function ProductsPage() {
       setMutating(false);
     }
   };
+
+  useEffect(() => {
+    if (!isFormOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !mutating) {
+        setEditingId(null);
+        setForm(emptyForm);
+        setError("");
+        setSuccess("");
+        setIsFormOpen(false);
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isFormOpen, mutating]);
 
   if (isChecking) {
     return (
@@ -355,128 +386,41 @@ export default function ProductsPage() {
         </header>
 
         <div className="mx-auto max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8">
-          <section aria-labelledby="products-heading">
-            <p className="pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c83f08]">
-              Products
-            </p>
-            <h1
-              id="products-heading"
-              className="font-heading text-3xl font-bold uppercase leading-none tracking-tight text-[#171717] sm:text-4xl"
+          <section
+            aria-labelledby="products-heading"
+            className="flex flex-wrap items-end justify-between gap-4"
+          >
+            <div>
+              <p className="pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#c83f08]">
+                Products
+              </p>
+              <h1
+                id="products-heading"
+                className="font-heading text-3xl font-bold uppercase leading-none tracking-tight text-[#171717] sm:text-4xl"
+              >
+                Manage Products
+              </h1>
+              <p className="mt-2 text-xs text-[#684c3d] sm:text-sm">
+                Manage the products currently in the inventory.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(null);
+                setForm(emptyForm);
+                setError("");
+                setSuccess("");
+                setIsFormOpen(true);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#ff6a00] to-[#c83f08] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:from-[#f45a00] hover:to-[#a93408]"
             >
-              Manage Products
-            </h1>
-            <p className="mt-2 text-xs text-[#684c3d] sm:text-sm">
-              Manage the products currently in the inventory.
-            </p>
+              <Plus aria-hidden="true" size={14} />
+              Add Product
+            </button>
           </section>
 
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl border border-[#f2e5d9] bg-white p-4 shadow-[0_6px_18px_rgba(115,70,30,0.12)] sm:p-5"
-        >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold sm:text-base">
-              {editingId === null ? "Add Product" : `Edit Product #${editingId}`}
-            </h2>
-            {editingId !== null && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-                disabled={mutating}
-                className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-[#684c3d] hover:bg-[#fff4e8] disabled:opacity-50"
-              >
-                <X aria-hidden="true" size={16} />
-                Cancel
-              </button>
-            )}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-xs font-medium text-[#513a2e]">
-              Product Name
-              <input
-                required
-                maxLength={255}
-                value={form.product_name}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    product_name: event.target.value,
-                  }))
-                }
-                placeholder="e.g. Wireless Mouse"
-                className="mt-1 h-9 w-full rounded-md border border-[#d4d4d4] px-3 text-xs font-normal outline-none focus:border-[#c83f08]"
-              />
-            </label>
-            <label className="text-xs font-medium text-[#513a2e]">
-              Product Price
-              <input
-                required
-                type="number"
-                min="0"
-                step="0.01"
-                value={form.product_price}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    product_price: event.target.value,
-                  }))
-                }
-                placeholder="0.00"
-                className="mt-1 h-9 w-full rounded-md border border-[#d4d4d4] px-3 text-xs font-normal outline-none focus:border-[#c83f08]"
-              />
-            </label>
-            <label className="text-xs font-medium text-[#513a2e]">
-              Product Manufacturer
-              <select
-                required
-                value={form.manufacturers_id}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    manufacturers_id: event.target.value,
-                  }))
-                }
-                disabled={manufacturers.length === 0 || mutating}
-                className="mt-1 h-9 w-full rounded-md border border-[#d4d4d4] bg-white px-3 text-xs font-normal outline-none focus:border-[#c83f08] disabled:bg-[#f5f5f5]"
-              >
-                <option value="">Select manufacturer</option>
-                {manufacturers.map((manufacturer) => (
-                  <option
-                    key={manufacturer.manufacturers_id}
-                    value={manufacturer.manufacturers_id}
-                  >
-                    {manufacturer.manufacturers_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {manufacturers.length === 0 && !loading && (
-            <p className="mt-3 text-xs text-[#737373]">
-              Add a manufacturer before creating or editing products.
-            </p>
-          )}
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <button
-              type="submit"
-              disabled={mutating || loading || manufacturers.length === 0}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#ff6a00] to-[#c83f08] px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:from-[#f45a00] hover:to-[#a93408] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {editingId === null ? (
-                <Plus aria-hidden="true" size={14} />
-              ) : (
-                <Pencil aria-hidden="true" size={14} />
-              )}
-              {mutating
-                ? "Saving..."
-                : editingId === null
-                  ? "Add Product"
-                  : "Save Changes"}
-            </button>
-          </div>
-        </form>
-
-        {error && (
+        {error && !isFormOpen && (
           <div
             role="alert"
             className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -584,6 +528,149 @@ export default function ProductsPage() {
             </tbody>
           </table>
         </section>
+
+        {isFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <button
+              type="button"
+              aria-label="Close product dialog"
+              onClick={handleCancelEdit}
+              disabled={mutating}
+              className="absolute inset-0 cursor-default bg-black/25 backdrop-blur-[1px] disabled:cursor-wait"
+            />
+            <section
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="product-dialog-title"
+              className="relative z-10 w-full max-w-sm rounded-xl border border-[#f2e5d9] bg-white p-5 shadow-[0_16px_40px_rgba(43,29,22,0.2)] sm:p-6"
+            >
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2
+                  id="product-dialog-title"
+                  className="text-base font-bold text-[#2b1d16]"
+                >
+                  {editingId === null ? "Add Product" : `Edit Product #${editingId}`}
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  disabled={mutating}
+                  aria-label="Close dialog"
+                  className="rounded-md p-1.5 text-[#8b7569] transition-colors hover:bg-[#fff4e8] hover:text-[#2b1d16] disabled:opacity-50"
+                >
+                  <X aria-hidden="true" size={18} />
+                </button>
+              </div>
+
+              {error && (
+                <p
+                  role="alert"
+                  className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700"
+                >
+                  {error}
+                </p>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <label className="block text-xs font-medium text-[#513a2e]">
+                  Product Name
+                  <input
+                    required
+                    maxLength={255}
+                    autoFocus
+                    value={form.product_name}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        product_name: event.target.value,
+                      }))
+                    }
+                    placeholder="e.g. Wireless Mouse"
+                    className="mt-1.5 h-9 w-full rounded-md border border-[#d4d4d4] px-3 text-xs font-normal outline-none transition-colors focus:border-[#c83f08] focus:ring-2 focus:ring-[#ff6a00]/15"
+                  />
+                </label>
+
+                <label className="block text-xs font-medium text-[#513a2e]">
+                  Product Price
+                  <input
+                    required
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={form.product_price}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        product_price: event.target.value,
+                      }))
+                    }
+                    placeholder="0.00"
+                    className="mt-1.5 h-9 w-full rounded-md border border-[#d4d4d4] px-3 text-xs font-normal outline-none transition-colors focus:border-[#c83f08] focus:ring-2 focus:ring-[#ff6a00]/15"
+                  />
+                </label>
+
+                <label className="block text-xs font-medium text-[#513a2e]">
+                  Product Manufacturer
+                  <select
+                    required
+                    value={form.manufacturers_id}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        manufacturers_id: event.target.value,
+                      }))
+                    }
+                    disabled={manufacturers.length === 0 || mutating}
+                    className="mt-1.5 h-9 w-full rounded-md border border-[#d4d4d4] bg-white px-3 text-xs font-normal outline-none transition-colors focus:border-[#c83f08] focus:ring-2 focus:ring-[#ff6a00]/15 disabled:bg-[#f5f5f5]"
+                  >
+                    <option value="">Select Manufacturer</option>
+                    {manufacturers.map((manufacturer) => (
+                      <option
+                        key={manufacturer.manufacturers_id}
+                        value={manufacturer.manufacturers_id}
+                      >
+                        {manufacturer.manufacturers_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {manufacturers.length === 0 && !loading && (
+                  <div className="text-xs text-[#737373]">
+                    <p className="mb-1">
+                      Add a manufacturer before creating products.
+                    </p>
+                    <Link
+                      href="/manufacturers"
+                      className="font-medium text-[#c83f08] underline underline-offset-2"
+                    >
+                      Go to Manufacturers
+                    </Link>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={mutating || loading || manufacturers.length === 0}
+                    className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#ff6a00] to-[#c83f08] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all hover:from-[#f45a00] hover:to-[#a93408] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {editingId === null ? (
+                      <Plus aria-hidden="true" size={14} />
+                    ) : (
+                      <Pencil aria-hidden="true" size={14} />
+                    )}
+                    {mutating
+                      ? "Saving..."
+                      : editingId === null
+                        ? "Add Product"
+                        : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
       </div>
       </main>
     </div>
