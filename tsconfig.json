@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -25,25 +24,11 @@
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "*/.ts",
+    "*/.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "*/.mts"
   ],
   "exclude": ["node_modules"]
 }
-=======
-    "module": "commonjs",
-    "target": "es2021",
-    "lib": ["es2021"],
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "strict": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*"]
-}
->>>>>>> f39bc25ce00429f2917c80707a18115a85b49bb3
